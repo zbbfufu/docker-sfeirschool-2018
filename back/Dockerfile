@@ -1,20 +1,42 @@
-# Create image with your nodejs image (replace zbbfufu by your docker id)
-FROM zbbfufu/nodejs:1.0
+# Create image from alpine:3.5
+FROM alpine:3.5
+
+# some usefull tags
+LABEL image-name docker-sfeirschool-back
+LABEL maintainer furgerot.f@sfeir.com
+LABEL sfeirschool-date 2018-03-07
+
+# install nodejs 
+RUN apk add --update nodejs
+
+# create user and group to run my app
+RUN addgroup mygroup && adduser -D -G mygroup myuser 
+
+# Environment variable
+ENV appDir /app
 
 # declare ports listening in the container
 EXPOSE 9000
 
 # Execute shell command : here create folder /app
-RUN mkdir /app
+RUN mkdir ${appDir}
 
 # declare /app as current default directory
-WORKDIR /app
+WORKDIR ${appDir}
 
 # Copy all files from "build context" to /app folder
-ADD . /app
+COPY . ${appDir}
 
-# Build the application
-RUN npm install
+
+# Build the application and clean npm cache
+RUN npm install && npm cache clean
+
+# fix ownership
+RUN chown -R myuser:mygroup /app
+
+# execute following instruction as myuser
+
+USER myuser
 
 # Declare container startup command
 ENTRYPOINT node server.js
