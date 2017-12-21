@@ -3,7 +3,7 @@
 
   const hostname    = require("os").hostname(),
         port        = 9000,
-		    exitHook    = require('async-exit-hook'),
+        exitHook    = require('async-exit-hook'),
         nano        = require('nano'),
         http        = require('http');
 
@@ -15,16 +15,17 @@
 
   var sfeirschool = nano({
     url: couchdbHost,
-    requestDefaults: { "timeout" : "100" } // in miliseconds
+    requestDefaults: { "timeout" : "2000" } // in miliseconds
   });
 
   http.createServer( handleRequest ).listen(port);
-  console.log('Server BACK running at http://' + hostname + ':' + port + '/');
+  console.log( new Date() + ': Server BACK running at http://' + hostname + ':' + port + '/');
 
   /* POST START INIT */
 
   // create container document with id=hostname and status "started"
-  register( 'back', hostname );
+  setTimeout( register, 2000, 'back', hostname );
+  //register( 'back', hostname );
 
   exitHook( callback => {
     // get and update container document with status = "stopped"
@@ -104,13 +105,21 @@
         "name": name,
         "status" : "started"
       },
-      type + '-' + name
+      type + '-' + name,
+	  function( err ) {
+		if( err ) {
+			console.log( err );
+		} else {
+			console.log( `Registered ${type}-${name}` );
+		}
+	  }
     );
   }
 
   function unregister( type, name, callback ) {
     sfeirschool.get( type + '-' + name, (err, body) => {
       if( err ) {
+		console.log( err );
         callback();
       } else {
         body.status = "stopped";

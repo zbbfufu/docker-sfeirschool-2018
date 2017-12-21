@@ -1,0 +1,52 @@
+body {
+  text-align: center;
+}
+.container-div {
+  display: inline-block;
+  vertical-align: top;
+}
+.container-list {
+  list-style: none;
+  margin: 0;
+  padding: 1em;
+  height: 1.5em;
+  width: 20em;
+}
+.container-item {
+  margin-bottom: 1em;
+  position: relative;
+  text-align: center;
+}
+.container-item h3 {
+  color: #fff;
+  left: 1em;
+  line-height: 1;
+  position: absolute;
+}
+.container-item::-webkit-progress-value {
+  -webkit-animation: bar-fill 2s;
+  width: 0px;
+}
+progress, progress[role] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background-size: auto;
+  height: 3em;
+  width: 100%;
+}
+
+.front progress::-webkit-progress-value {
+  background: #ff9e2c;
+}
+.front progress::-moz-progress-bar {
+  background: #ff9e2c;
+}
+
+.back progress::-webkit-progress-value {
+  background: #4ecdc4;
+}
+.back progress::-moz-progress-bar {
+  background: #4ecdc4;
+}
