@@ -1,7 +1,7 @@
-version: "3"
+version: '3'
 services:
   webui:
-    image: zbbfufu/docker-sfeir-webui:1.0
+    image: zbbfufu/docker-sfeir-webui:2.0
     build: ./webui
     networks:
       - web_net
@@ -10,16 +10,14 @@ services:
     depends_on:
       - front
   front:
-    image: zbbfufu/docker-sfeir-front:1.0
+    image: zbbfufu/docker-sfeir-front:2.0
     build: ./front
-    ports:
-      - 3000:3000
     networks:
       - web_net
     depends_on:
       - back
   back:
-    image: zbbfufu/docker-sfeir-back:1.0
+    image: zbbfufu/docker-sfeir-back:2.0
     build: ./back
     networks:
       - web_net
@@ -34,12 +32,17 @@ services:
       - couchdb_vol:/opt/couchdb/data
     networks:
       - db_net
+    deploy:
+      placement:
+        constraints:
+          - node.labels.database == true
 
-networks:
-  db_net:
-    driver: bridge
-  web_net:
-    driver: bridge
 
 volumes:
   couchdb_vol:
+
+networks:
+  db_net:
+    driver: overlay
+  web_net:
+    driver: overlay
