@@ -18,6 +18,7 @@ services:
       - back
   back:
     image: zbbfufu/docker-sfeir-back:2.0
+    build: ./back
     networks:
       - web_net
       - db_net
@@ -35,10 +36,13 @@ services:
       placement:
         constraints:
           - node.hostname == sfeir1
+
 volumes:
   couchdb_vol:
+
 networks:
   db_net:
     driver: overlay
   web_net:
     driver: overlay
+
