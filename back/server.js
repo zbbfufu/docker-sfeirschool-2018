@@ -22,12 +22,12 @@
 
     http.createServer( handleRequest ).listen(port);
     console.log('Server BACK running at http://' + hostname + ':' + port + '/');
-  
+
     /* POST START INIT */
-  
+
     // create container document with id=hostname and status "started"
     register( 'back', hostname );
-  
+
     exitHook( callback => {
       // get and update container document with status = "stopped"
       unregister( 'back', hostname, callback );
@@ -40,24 +40,24 @@
     var tmpNano = nano({
       url: couchdbHost,
       requestDefaults: { "timeout" : "5000" } // in milliseconds
-    }); 
-        
-    tmpNano.db.get( dbname, function( err, body ) { 
-      if( err ) { 
+    });
+
+    tmpNano.db.get( dbname, function( err, body ) {
+      if( err ) {
         tmpNano.db.create( dbname, function(err, body) {
-          if( err ) { 
+          if( err ) {
             console.error( err );
             setTimeout( createDb, 1000);
           } else {
             console.log( 'Database created : ' + couchdbHost + dbname );
             createView();
           }
-        }); 
+        });
       } else {
         console.log( `Database ${dbname} exists` );
         createView();
       }
-    }); 
+    });
   }
 
   /* CREATE VIEW FUNCTION */
@@ -76,7 +76,7 @@
       function( err ) {
         if( err ) {
           console.error( err );
-          throw err;
+          //throw err;
         } else {
           console.log( 'View created' );
         }
