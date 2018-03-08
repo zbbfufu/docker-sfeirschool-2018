@@ -1,4 +1,4 @@
-version: '3.5'
+version: '2'
 
 networks:
   db_net:
@@ -9,24 +9,22 @@ volumes:
 
 services:
   webui:
-      image: zbbfufu/docker-sfeir-webui:2.0
-      ports:
-        - "8000:80"
-      networks:
-        - web_net
-      depends_on:
-        - front
+    image: zbbfufu/docker-sfeir-webui:2.0
+    ports:
+      - "8080:80"
+    networks:
+      - web_net
+    depends_on:
+      - front
   front:
     image: zbbfufu/sfeir-front:2018
     build: ./front
     ports:
-        - "80:3000"
+      - "80:3000"
     networks:
       - web_net
     depends_on:
       - back
-    deploy:
-       replicas: 25
   back:
     image: zbbfufu/sfeir-back:2018
     build: ./back
@@ -35,8 +33,6 @@ services:
       - db_net
     depends_on:
       - db
-    deploy:
-       replicas: 50
   db:
     image: couchdb:2.1
     networks:
@@ -45,8 +41,3 @@ services:
           - couchdb
     volumes:
       - db_data:/opt/couchdb/data
-    deploy:
-      placement:
-         constraints:
-             - node.hostname == node1
-
