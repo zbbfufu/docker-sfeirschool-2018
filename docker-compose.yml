@@ -1,0 +1,35 @@
+version: '2'
+
+networks:
+  db_net:
+  web_net:
+
+volumes:
+  db_data:
+
+services:
+  front:
+    image: zbbfufu/sfeir-front:2018
+    build: ./front
+    ports:
+      - "80:3000"
+    networks:
+      - web_net
+    depends_on:
+      - back
+  back:
+    image: zbbfufu/sfeir-back:2018
+    build: ./back
+    networks:
+      - web_net
+      - db_net
+    depends_on:
+      - db
+  db:
+    image: couchdb:2.1
+    networks:
+      db_net:
+        aliases:
+          - couchdb
+    volumes:
+      - db_data:/opt/couchdb/data
