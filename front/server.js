@@ -13,18 +13,12 @@
   console.log( 'Using ' + backHost + ' as back url' );
 
   http.createServer( handleRequest ).listen(port);
-  console.log('Server FRONT running at http://' + hostname + ':' + port + '/');
+  console.log(`Server FRONT running at http://${hostname}:${port}/`);
 
   /* POST START INIT */
 
   // create container document with id=hostname and status "started"
-  http.get(backHost +'/register/'+ hostname, function( res ) {
-    if( res.statusCode === 200 ) {
-      console.log( 'Front ' + hostname + ' registered successfully' );
-    } else {
-      console.log( res.statusMessage );
-    }
-  });
+  setTimeout( register, 5000, backHost, hostname );
 
   exitHook( callback => {
     // get and update container document with status = "stopped"
@@ -32,9 +26,13 @@
       if( res.statusCode === 200 ) {
         console.log( 'Front ' + hostname + ' unregistered successfully' );
       } else {
-        console.log( res.statusMessage );
+        console.error( res.statusMessage );
       }
-    });
+      callback();
+    }).on('error', (e) => {
+       console.error(`Got error: ${e.message}`);
+       callback();
+	});
   });
 
   /* REQUEST HANDLE FUNCTION */
@@ -64,7 +62,22 @@
         response.writeHead( res.statusCode );
         response.end( res.statusMessage );
       }
+    }).on('error', (e) => {
+       console.error(`Got error: ${e.message}`);
     }); // end http.get
   }; // end handleRequest
+
+
+  function register( backHost, hostname ) {
+    http.get(backHost +'/register/'+ hostname, function( res ) {
+      if( res.statusCode === 200 ) {
+        console.log( `Front ${hostname} registered successfully` );
+      } else {
+        console.error( res.statusMessage );
+      }
+    }).on('error', (e) => {
+  	  console.error(`Got error: ${e.message}`);
+    });
+  }
 
 })();

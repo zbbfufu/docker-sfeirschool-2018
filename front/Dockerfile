@@ -25,10 +25,12 @@ RUN mkdir ${appDir}
 WORKDIR ${appDir}
 
 # Copy all files from "build context" to /app folder
-COPY . ${appDir}
+COPY package.json package-lock.json ${appDir}/
 
 # Build the application and clean npm cache
 RUN npm install && npm cache clean
+
+COPY server.js ${appDir}/
 
 # fix ownership
 RUN chown -R myuser:mygroup /app

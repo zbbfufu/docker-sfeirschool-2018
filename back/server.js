@@ -2,35 +2,87 @@
   'use strict';
 
   const hostname    = require("os").hostname(),
+        dbname      = 'sfeirschool',
         port        = 9000,
-		    exitHook    = require('async-exit-hook'),
+		exitHook    = require('async-exit-hook'),
         nano        = require('nano'),
         http        = require('http');
 
-  var couchdbHost = 'http://couchdb:5984/sfeirschool';
+  var couchdbHost = 'http://couchdb:5984/';
   if( process.argv.length == 3 ) {
-    couchdbHost = 'http://' + process.argv[2] + ':5984/sfeirschool';
+    couchdbHost = 'http://' + process.argv[2] + ':5984/';
   }
   console.log( 'Using ' + couchdbHost + ' as couchdb url' );
 
-  var sfeirschool = nano({
-    url: couchdbHost,
-    requestDefaults: { "timeout" : "100" } // in miliseconds
-  });
+  // create database
+  createDb();
 
-  http.createServer( handleRequest ).listen(port);
-  console.log('Server BACK running at http://' + hostname + ':' + port + '/');
+  function startServer() {
+    /* START SERVER */
 
-  /* POST START INIT */
+    http.createServer( handleRequest ).listen(port);
+    console.log('Server BACK running at http://' + hostname + ':' + port + '/');
+  
+    /* POST START INIT */
+  
+    // create container document with id=hostname and status "started"
+    register( 'back', hostname );
+  
+    exitHook( callback => {
+      // get and update container document with status = "stopped"
+      unregister( 'back', hostname, callback );
+    });
+  };
 
-  // create container document with id=hostname and status "started"
-  register( 'back', hostname );
+  /* CREATE DB FUNCTION */
 
-  exitHook( callback => {
-    // get and update container document with status = "stopped"
-    unregister( 'back', hostname, callback );
-  });
+  function createDb(){
+    var tmpNano = nano({
+      url: couchdbHost,
+      requestDefaults: { "timeout" : "5000" } // in milliseconds
+    }); 
+        
+    tmpNano.db.get( dbname, function( err, body ) { 
+      if( err ) { 
+        tmpNano.db.create( dbname, function(err, body) {
+          if( err ) { 
+            console.error( err );
+            setTimeout( createDb, 1000);
+          } else {
+            console.log( 'Database created : ' + couchdbHost + dbname );
+            createView();
+          }
+        }); 
+      } else {
+        console.log( `Database ${dbname} exists` );
+        createView();
+      }
+    }); 
+  }
 
+  /* CREATE VIEW FUNCTION */
+  function createView() {
+    connect().insert(
+      {
+        "_id": "_design/calls",
+        "views": {
+          "type": {
+            "map": "function (doc) {\n  if(doc.type === 'call') {\n        emit(doc.front + '/' + doc.back, 1);\n    }\n}",
+            "reduce": "_count"
+          }
+        },
+        "language": "javascript"
+      },
+      function( err ) {
+        if( err ) {
+          console.error( err );
+          throw err;
+        } else {
+          console.log( 'View created' );
+        }
+        startServer();
+      });
+  }
 
   /* REQUEST HANDLE FUNCTION */
 
@@ -75,13 +127,13 @@
   }; // end handleRequest
 
   function recordCall( remoteName, local, callback ) {
-    sfeirschool.insert(
+    connect().insert(
       { "type": "call", "front": remoteName, "back": local, "ts": new Date() },
       function( err ) {
         if( err ) {
           callback( err );
         } else {
-          sfeirschool.view( 'calls', 'type', { "group_level": 1 }, function(err, body){
+          connect().view( 'calls', 'type', { "group_level": 1 }, function(err, body){
             if( err ) {
               callback( err );
             } else {
@@ -97,7 +149,7 @@
   }
 
   function register( type, name ) {
-    sfeirschool.insert(
+    connect().insert(
       {
         "type": "container",
         "image": type,
@@ -109,16 +161,23 @@
   }
 
   function unregister( type, name, callback ) {
-    sfeirschool.get( type + '-' + name, (err, body) => {
+    connect().get( type + '-' + name, (err, body) => {
       if( err ) {
         callback();
       } else {
         body.status = "stopped";
-        sfeirschool.insert( body, () => {
+        connect().insert( body, () => {
           console.log( "Container back unregistered");
           callback();
         });
       }
+    });
+  }
+
+  function connect() {
+    return nano({
+      url: couchdbHost + dbname,
+      requestDefaults: { "timeout" : "100" } // in miliseconds
     });
   }
 
