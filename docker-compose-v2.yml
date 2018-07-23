@@ -17,7 +17,7 @@ services:
     depends_on:
       - front
   front:
-    image: zbbfufu/sfeir-front:2018
+    image: zbbfufu/sfeir-front:1.0
     build: ./front
     ports:
       - "80:3000"
@@ -26,7 +26,7 @@ services:
     depends_on:
       - back
   back:
-    image: zbbfufu/sfeir-back:2018
+    image: zbbfufu/sfeir-back:1.0
     build: ./back
     networks:
       - web_net
