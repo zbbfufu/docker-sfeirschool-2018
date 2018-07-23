@@ -4,13 +4,13 @@ FROM alpine:3.5
 # some usefull tags
 LABEL image-name docker-sfeirschool-back
 LABEL maintainer furgerot.f@sfeir.com
-LABEL sfeirschool-date 2018-03-07
+LABEL sfeirschool-date 2018-07-23
 
-# install nodejs 
+# install nodejs
 RUN apk add --update nodejs
 
 # create user and group to run my app
-RUN addgroup mygroup && adduser -D -G mygroup myuser 
+RUN addgroup mygroup && adduser -D -G mygroup myuser
 
 # Environment variable
 ENV appDir /app
@@ -25,18 +25,15 @@ RUN mkdir ${appDir}
 WORKDIR ${appDir}
 
 # Copy all files from "build context" to /app folder
-COPY package.json package-lock.json ${appDir}/
+COPY --chown=myuser:mygroup package.json package-lock.json ${appDir}/
 
 # Build the application and clean npm cache
-RUN npm install && npm cache clean
+RUN npm install \
+    && npm cache clean
 
 COPY server.js ${appDir}
 
-# fix ownership
-RUN chown -R myuser:mygroup /app
-
 # execute following instruction as myuser
-
 USER myuser
 
 # Declare container startup command
