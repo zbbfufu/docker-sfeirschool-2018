@@ -35,7 +35,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.hostname == sfeir1
+          - node.hostname == manager
 
 volumes:
   couchdb_vol:
@@ -45,4 +45,3 @@ networks:
     driver: overlay
   web_net:
     driver: overlay
-
