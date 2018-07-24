@@ -1,5 +1,5 @@
 # Create image with your nodejs image (replace zbbfufu by your docker id)
-FROM zbbfufu/nodejs:1.0
+FROM alpine:3.5
 
 # some usefull tags
 LABEL image-name docker-sfeirschool-back
@@ -8,6 +8,8 @@ LABEL sfeirschool-date 2017-12-20
 
 # Environment variable
 ENV appDir /app
+
+RUN apk add --update nodejs
 
 # declare ports listening in the container
 EXPOSE 9000
