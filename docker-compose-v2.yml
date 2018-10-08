@@ -18,7 +18,6 @@ services:
       - front
   front:
     image: zbbfufu/docker-sfeir-front:2.0
-    image: zbbfufu/sfeir-front:1.0
     build: ./front
     ports:
       - "80:3000"
