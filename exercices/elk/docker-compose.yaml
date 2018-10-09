@@ -1,0 +1,14 @@
+version: '2.2'
+
+volumes:
+  logdir:
+
+services:
+    flog:
+      image: zbbfufu/flog:latest
+      build: ./flog
+      working_dir: /logs
+      command:
+        -n 10000 -t log -o generated.log
+      volumes:
+        - logdir:/logs
